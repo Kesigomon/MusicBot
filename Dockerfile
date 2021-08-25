@@ -15,7 +15,8 @@ RUN pip3 install -r requirements.txt
 ### arm向けにビルドするならこっち
 ### こちらを利用する場合、あらかじめ/wheels/build.pyを実行しておくこと
 #COPY ./wheels/wheels /tmp/wheels
-#RUN pip3 install -r requirements.txt --no-index --find-links=/tmp/wheels
+#RUN mv wheels/wheels /tmp/wheels && rm -r wheels \
+#    && pip3 install -r requirements.txt --no-index --find-links=/tmp/wheels
 ### ここまでビルドありバージョン
 
 FROM python:3.7-slim-buster
@@ -29,4 +30,4 @@ ENV PATH=/venv/bin:$PATH
 WORKDIR /opt/MusicBot
 VOLUME [/opt/MusicBot/config]
 ENV APP_ENV=docker
-ENTRYPOINT ["python3", "dockerentry.py"]
+ENTRYPOINT "python3 dockerentry.py"
