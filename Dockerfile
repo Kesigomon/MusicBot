@@ -1,37 +1,21 @@
-FROM alpine:edge
+FROM python:3.7-buster as build
+WORKDIR /opt
+RUN python3 -m venv /venv
+ENV PATH=/venv/bin:$PATH
+WORKDIR /opt/MusicBot
+COPY . .
+COPY ./wheels/wheels /tmp/wheels
+RUN pip3 install -r requirements.txt --no-index --find-links=/tmp/wheels
 
-# Add project source
-WORKDIR /usr/src/musicbot
-COPY . ./
-
-# Install dependencies
-RUN apk update \
-&& apk add --no-cache \
-  ca-certificates \
-  ffmpeg \
-  opus \
-  python3 \
-  libsodium-dev \
-\
-# Install build dependencies
-&& apk add --no-cache --virtual .build-deps \
-  gcc \
-  git \
-  libffi-dev \
-  make \
-  musl-dev \
-  python3-dev \
-\
-# Install pip dependencies
-&& pip3 install --no-cache-dir -r requirements.txt \
-&& pip3 install --upgrade --force-reinstall --version websockets==4.0.1 \
-\
-# Clean up build dependencies
-&& apk del .build-deps
-
-# Create volume for mapping the config
-VOLUME /usr/src/musicbot/config
-
+FROM python:3.7-slim-buster
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+COPY --from=build /venv /venv
+COPY --from=build /opt/MusicBot /opt/MusicBot
+ENV PATH=/venv/bin:$PATH
+WORKDIR /opt/MusicBot
+VOLUME [/opt/MusicBot/config]
 ENV APP_ENV=docker
-
 ENTRYPOINT ["python3", "dockerentry.py"]
