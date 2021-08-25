@@ -18,3 +18,5 @@ Dockerfile
 # IDE
 .idea/
 .vscode/
+
+wheels/

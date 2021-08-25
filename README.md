@@ -1,3 +1,7 @@
+# ビルド方法
+
+[Build.md](Build.md)にのっている
+
 # MusicBot
 
 [![GitHub stars](https://img.shields.io/github/stars/Just-Some-Bots/MusicBot.svg)](https://github.com/Just-Some-Bots/MusicBot/stargazers)

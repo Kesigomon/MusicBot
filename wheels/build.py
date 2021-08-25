@@ -24,6 +24,7 @@ def tasks(platform: str):
     
 
 def main():
+    os.chdir(os.path.dirname(__file__))
     platforms = ["linux/amd64", "linux/arm64"]
     shutil.copy("../requirements.txt", ".")
     subprocess.run("docker run --rm --privileged multiarch/qemu-user-static --reset -p yes".split())
@@ -31,4 +32,6 @@ def main():
     [t.start() for t in threads]
     [t.join() for t in threads]
 
-main()
+
+if __name__ == "__main__":
+    main()
