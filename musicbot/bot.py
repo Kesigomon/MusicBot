@@ -106,7 +106,15 @@ class MusicBot(discord.Client):
         }
         self.server_specific_data = defaultdict(ssd_defaults.copy)
 
-        super().__init__()
+        super().__init__(
+            intents=discord.Intents(
+                guilds=True,
+                messages=True,
+                voice_states=True,
+                members=True,
+                presences=True
+            )
+        )
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
 
