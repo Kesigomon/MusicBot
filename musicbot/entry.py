@@ -38,12 +38,12 @@ class BasePlaylistEntry(Serializable):
     async def _download(self):
         raise NotImplementedError
 
-    def get_ready_future(self):
+    def get_ready_future(self, loop=None):
         """
         Returns a future that will fire when the song is ready to be played. The future will either fire with the result (being the entry) or an exception
         as to why the song download failed.
         """
-        future = asyncio.Future()
+        future = asyncio.Future(loop=loop)
         if self.is_downloaded:
             # In the event that we're downloaded, we're already ready for playback.
             future.set_result(self)

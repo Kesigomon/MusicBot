@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import sys
 import json
@@ -21,6 +22,9 @@ from .lib.event_emitter import EventEmitter
 from .constructs import Serializable, Serializer
 from .exceptions import FFmpegError, FFmpegWarning
 from .entry import URLPlaylistEntry, StreamPlaylistEntry
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .constructs import SkipState
 
 log = logging.getLogger(__name__)
 
@@ -119,6 +123,7 @@ class MusicPlayer(EventEmitter, Serializable):
         super().__init__()
         self.bot = bot
         self.loop = bot.loop
+        self.repeat = 0
         self.voice_client = voice_client
         self.playlist = playlist
         self.autoplaylist = None
@@ -131,6 +136,7 @@ class MusicPlayer(EventEmitter, Serializable):
         self._current_player = None
         self._current_entry = None
         self._stderr_future = None
+        self._skipped = False
 
         self._source = None
 
@@ -153,6 +159,7 @@ class MusicPlayer(EventEmitter, Serializable):
         self.emit('entry-added', player=self, playlist=playlist, entry=entry)
 
     def skip(self):
+        self._skipped = True
         self._kill_current_player()
 
     def stop(self):
@@ -196,6 +203,12 @@ class MusicPlayer(EventEmitter, Serializable):
         self._events.clear()
         self._kill_current_player()
 
+    def switch_repeat_queue(self):
+        self.repeat += 1
+        if self.repeat < 0 or self.repeat >= 3:
+            self.repeat = 0
+        return self.repeat
+
     def _playback_finished(self, error=None):
         entry = self._current_entry
 
@@ -205,6 +218,14 @@ class MusicPlayer(EventEmitter, Serializable):
 
         self._current_entry = None
         self._source = None
+
+        if self._skipped:
+            self._skipped = False
+        else:
+            if self.repeat == 1:
+                self.playlist.push_entry(entry, head=False)
+            elif self.repeat == 2:
+                self.playlist.push_entry(entry, head=True)
 
         if self._stderr_future.done() and self._stderr_future.exception():
             # I'm not sure that this would ever not be done if it gets to this point

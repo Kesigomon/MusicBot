@@ -465,7 +465,7 @@ class MusicBot(discord.Client):
 
         return player
 
-    async def on_player_play(self, player, entry):
+    async def on_player_play(self, player: MusicPlayer, entry):
         log.debug('Running on_player_play')
         await self.update_now_playing_status(entry)
         player.skip_state.reset()
@@ -1588,7 +1588,7 @@ class MusicBot(discord.Client):
 
         return Response(reply_text, delete_after=30)
 
-    async def _cmd_play_playlist_async(self, player, channel, author, permissions, playlist_url, extractor_type):
+    async def _cmd_play_playlist_async(self, player: MusicPlayer, channel, author, permissions, playlist_url, extractor_type):
         """
         Secret handler to use the async wizardry to make playlist queuing non-"blocking"
         """
@@ -2062,7 +2062,7 @@ class MusicBot(discord.Client):
                 self.str.get('cmd-remove-noperms', "You do not have the valid permissions to remove that entry from the queue, make sure you're the one who queued it or have instant skip permissions"), expire_in=20
             )
 
-    async def cmd_skip(self, player, channel, author, message, permissions, voice_channel, param=''):
+    async def cmd_skip(self, player: MusicPlayer, channel, author, message, permissions, voice_channel, param=''):
         """
         Usage:
             {command_prefix}skip [force/f]
@@ -2597,10 +2597,13 @@ class MusicBot(discord.Client):
         return Response('Left the guild: `{0.name}` (Owner: `{0.owner.name}`, ID: `{0.id}`)'.format(t))
 
     async def cmd_loop(self, player: MusicPlayer):
-        if player.playlist.switch_loop_queue():
-            return Response('Now looping the **queue**.')
+        value = player.switch_repeat_queue()
+        if value == 1:
+            return Response('Now looping the **queue**.', delete_after=10)
+        elif value == 2:
+            return Response('Now looping the **current track**.', delete_after=10)
         else:
-            return Response('Looping is now **disabled**.')
+            return Response('Looping is now **disabled**.', delete_after=10)
 
     @dev_only
     async def cmd_breakpoint(self, message):

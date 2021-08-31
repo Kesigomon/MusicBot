@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os.path
 import logging
 import datetime
@@ -9,11 +11,13 @@ from collections import deque
 from urllib.error import URLError
 from youtube_dl.utils import ExtractorError, DownloadError, UnsupportedError
 
-from .bot import MusicBot
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .bot import MusicBot
 from .utils import get_header
 from .constructs import Serializable
 from .lib.event_emitter import EventEmitter
-from .entry import URLPlaylistEntry, StreamPlaylistEntry
+from .entry import BasePlaylistEntry, URLPlaylistEntry, StreamPlaylistEntry
 from .exceptions import ExtractionError, WrongEntryTypeError
 
 log = logging.getLogger(__name__)
@@ -118,7 +122,7 @@ class Playlist(EventEmitter, Serializable):
             self.downloader.ytdl.prepare_filename(info),
             **meta
         )
-        self._add_entry(entry)
+        self.push_entry(entry)
         return entry, len(self.entries)
 
     async def add_stream_entry(self, song_url, info=None, **meta):
@@ -167,7 +171,7 @@ class Playlist(EventEmitter, Serializable):
             destination = dest_url,
             **meta
         )
-        self._add_entry(entry)
+        self.push_entry(entry)
         return entry, len(self.entries)
 
     async def import_from(self, playlist_url, **meta):
@@ -209,7 +213,7 @@ class Playlist(EventEmitter, Serializable):
                         **meta
                     )
 
-                    self._add_entry(entry)
+                    self.push_entry(entry)
                     entry_list.append(entry)
                 except Exception as e:
                     baditems += 1
@@ -306,7 +310,7 @@ class Playlist(EventEmitter, Serializable):
 
         return gooditems
 
-    def _add_entry(self, entry, *, head=False):
+    def push_entry(self, entry: BasePlaylistEntry, *, head=False):
         if head:
             self.entries.appendleft(entry)
         else:
@@ -315,7 +319,7 @@ class Playlist(EventEmitter, Serializable):
         self.emit('entry-added', playlist=self, entry=entry)
 
         if self.peek() is entry:
-            entry.get_ready_future()
+            entry.get_ready_future(self.loop)
 
     def remove_entry(self, index):
         del self.entries[index]
