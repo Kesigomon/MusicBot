@@ -32,7 +32,6 @@ class Playlist(EventEmitter, Serializable):
         super().__init__()
         self.bot = bot
         self.loop = bot.loop
-        self.queue_loop = False
         self.downloader = bot.downloader
         self.entries = deque()
 
@@ -47,10 +46,6 @@ class Playlist(EventEmitter, Serializable):
 
     def clear(self):
         self.entries.clear()
-
-    def switch_loop_queue(self):
-        self.queue_loop = not self.queue_loop
-        return self.queue_loop
 
     def get_entry_at_index(self, index):
         self.entries.rotate(-index)
@@ -340,10 +335,6 @@ class Playlist(EventEmitter, Serializable):
             next_entry = self.peek()
             if next_entry:
                 next_entry.get_ready_future()
-
-        # TODO: Queueの1曲ループ実装したいわね
-        if self.queue_loop:
-            self.entries.append(entry)
 
         return await entry.get_ready_future()
 
