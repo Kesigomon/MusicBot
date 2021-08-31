@@ -70,6 +70,7 @@ class MusicBot(discord.Client):
         self.init_ok = False
         self.cached_app_info = None
         self.last_status = None
+        self.queue_loop = True
 
         self.config = Config(config_file)
         
@@ -2594,6 +2595,12 @@ class MusicBot(discord.Client):
                 raise exceptions.CommandError('No guild was found with the ID or name as `{0}`'.format(val))
         await t.leave()
         return Response('Left the guild: `{0.name}` (Owner: `{0.owner.name}`, ID: `{0.id}`)'.format(t))
+
+    async def cmd_loop(self, player: MusicPlayer):
+        if player.playlist.switch_loop_queue():
+            return Response('Now looping the **queue**.')
+        else:
+            return Response('Looping is now **disabled**.')
 
     @dev_only
     async def cmd_breakpoint(self, message):

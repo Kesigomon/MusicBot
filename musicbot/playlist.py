@@ -9,6 +9,7 @@ from collections import deque
 from urllib.error import URLError
 from youtube_dl.utils import ExtractorError, DownloadError, UnsupportedError
 
+from .bot import MusicBot
 from .utils import get_header
 from .constructs import Serializable
 from .lib.event_emitter import EventEmitter
@@ -23,10 +24,11 @@ class Playlist(EventEmitter, Serializable):
         A playlist is manages the list of songs that will be played.
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: MusicBot):
         super().__init__()
         self.bot = bot
         self.loop = bot.loop
+        self.queue_loop = False
         self.downloader = bot.downloader
         self.entries = deque()
 
@@ -41,7 +43,11 @@ class Playlist(EventEmitter, Serializable):
 
     def clear(self):
         self.entries.clear()
-        
+
+    def switch_loop_queue(self):
+        self.queue_loop = not self.queue_loop
+        return self.queue_loop
+
     def get_entry_at_index(self, index):
         self.entries.rotate(-index)
         entry = self.entries[0]
@@ -330,6 +336,10 @@ class Playlist(EventEmitter, Serializable):
             next_entry = self.peek()
             if next_entry:
                 next_entry.get_ready_future()
+
+        # TODO: Queueの1曲ループ実装したいわね
+        if self.queue_loop:
+            self.entries.append(entry)
 
         return await entry.get_ready_future()
 
