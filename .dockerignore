@@ -19,4 +19,5 @@ Dockerfile
 .idea/
 .vscode/
 
-#wheels/
+# Wheelsを事前ビルドした場合はコメントアウト
+wheels/
