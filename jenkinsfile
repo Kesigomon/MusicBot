@@ -13,7 +13,7 @@ pipeline {
         }
         steps {
             dir('wheels') {
-                sh '''ln -s /opt/musicbot_wheels wheels && ./build.sh'''
+                sh '''ln -s /opt/musicbot_wheels wheels && bash build.sh'''
             }
         }
     }
