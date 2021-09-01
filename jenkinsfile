@@ -1,14 +1,6 @@
 pipeline {
   agent any
   stages {
-    stage('Build Wheels') {
-        where{
-            changeset "requirements.txt"
-        }
-        steps {
-            sh '''sed -i \'s|wheels/|#wheels/|g\' .dockerignore && python3 wheels/build.py '''
-        }
-    }
     stage('Build Image') {
         steps {
             sh '''docker buildx build --push --platform linux/arm64,linux/amd64 -t ${ENDPOINT}:$(echo $GIT_BRANCH | sed -e \'s/origin\\///g\') .'''
