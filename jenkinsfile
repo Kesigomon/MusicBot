@@ -1,11 +1,28 @@
 pipeline {
   agent any
+  environment {
+        PLATFORM = 'linux/arm64,linux/amd64'
+  }
   stages {
+    stage('Build Wheels') {
+        when{
+            anyOf{
+                changeset "requirements.txt"
+                not {expression {return fileExists("./wheels/wheels") }}
+            }
+        }
+        steps {
+            dir('wheels') {
+                sh '''ln -s /opt/musicbot_wheels wheels && ./build.sh'''
+            }
+        }
+    }
     stage('Build Image') {
         steps {
             withCredentials([string(credentialsId: 'ENDPOINT', variable: 'ENDPOINT')]) {
-                sh '''docker buildx build --push --platform linux/arm64,linux/amd64 -t \\
-                    ${ENDPOINT}:$(echo $GIT_BRANCH | sed -e \'s/origin\\///g\' -e \'s|/|_|g\') .'''
+                sh '''sed -i 's/wheels/#wheels/g' .dockerignore  \\
+                    && docker buildx build --push --platform $PLATFORM -t \\
+                       ${ENDPOINT}:$(echo $GIT_BRANCH | sed -e \'s/origin\\///g\' -e \'s|/|_|g\') .'''
             }
             
         }
