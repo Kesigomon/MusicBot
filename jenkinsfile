@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build Image') {
         steps {
-            sh '''docker buildx build --push --platform linux/arm64,linux/amd64 -t
+            sh '''docker buildx build --push --platform linux/arm64,linux/amd64 -t \\
                   ${ENDPOINT}:$(echo $GIT_BRANCH | sed -e \'s/origin\\///g\' -e \'s|/|_|g\') .'''
         }
     }
