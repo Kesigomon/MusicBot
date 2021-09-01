@@ -10,4 +10,5 @@ do
     docker exec -i $Cont \
       /bin/bash -c "export LIBSODIUM_MAKE_ARGS=-j4; pip wheel --find-links wheels -r requirements.txt -w wheels"
     docker rm -f $Cont
+    chmod 755 wheels/*
 done
