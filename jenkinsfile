@@ -21,7 +21,7 @@ pipeline {
         steps {
             withCredentials([string(credentialsId: 'ENDPOINT', variable: 'ENDPOINT')]) {
                 sh '''sed -i 's/wheels/#wheels/g' .dockerignore  \\
-                    && tar -ch . | docker buildx build --push --platform $PLATFORM -t \\
+                    && tar -ch --exclude-ignore=.tarignore . | docker buildx build --push --platform $PLATFORM -t \\
                        ${ENDPOINT}:$(echo $GIT_BRANCH | sed -e \'s/origin\\///g\' -e \'s|/|_|g\') -'''
             }
             
