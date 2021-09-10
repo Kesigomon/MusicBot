@@ -113,7 +113,8 @@ class MusicBot(discord.Client):
                 messages=True,
                 voice_states=True,
                 members=True,
-                presences=True
+                presences=True,
+                reactions=True
             )
         )
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
