@@ -12,6 +12,8 @@ musicbot/lib/__pycache__/
 .git
 .gitattributes
 .gitignore
+.github
+.travis
 
 .idea/
 .vscode/
